@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">แอปตังค์เหลือ</string>
+    <string name="widget_name">แอปตังค์เหลือ</string>
+    <string name="widget_desc">บันทึกค่าใช้จ่ายเร็ว</string>
+</resources>
