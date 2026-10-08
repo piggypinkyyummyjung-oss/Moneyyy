@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>แอปตังค์เหลือ</title>
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "Sarabun", sans-serif;
+  background: #f5f5f7;
+  color: #222;
+  padding: 12px;
+  padding-bottom: 80px;
+}
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.totals {
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(76,175,80,.3);
+}
+.totals .row { display: flex; justify-content: space-between; margin: 8px 0; }
+.totals .big { font-size: 32px; font-weight: 700; margin: 4px 0 12px; }
+.totals .label { opacity: .9; font-size: 13px; }
+.totals .sub { font-size: 15px; }
+h2 { font-size: 16px; margin: 0 0 12px; color: #555; }
+input, select, button {
+  font-size: 16px;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 12px 14px;
+  width: 100%;
+  background: #fff;
+  color: #222;
+  outline: none;
+}
+input:focus, select:focus { border-color: #4CAF50; }
+button {
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 14px;
+  margin-top: 8px;
+}
+button.secondary { background: #eee; color: #333; }
+button.danger { background: #f44336; }
+.row-flex { display: flex; gap: 8px; }
+.row-flex > * { flex: 1; }
+.quick-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0; }
+.quick-amounts button {
+  padding: 10px 4px;
+  background: #f0f0f0;
+  color: #333;
+  margin: 0;
+}
+.undo-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: #323232;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  transform: translateY(120%);
+  transition: transform .3s ease;
+  z-index: 9999;
+  font-size: 14px;
+}
+.undo-bar.show { transform: translateY(0); }
+.undo-bar button {
+  background: #ff9800;
+  color: #fff;
+  padding: 8px 16px;
+  margin: 0;
+  width: auto;
+  font-size: 14px;
+  border-radius: 8px;
+}
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  display: flex;
+  border-top: 1px solid #eee;
+  padding: 4px 0;
+  z-index: 100;
+}
+.tab-bar button {
+  flex: 1;
+  background: none;
+  color: #888;
+  border: none;
+  margin: 0;
+  padding: 12px 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tab-bar button.active { color: #4CAF50; }
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+.expense-item:last-child { border-bottom: none; }
+.expense-item .info { flex: 1; }
+.expense-item .name { font-weight: 500; }
+.expense-item .date { font-size: 12px; color: #888; margin-top: 2px; }
+.expense-item .amt { font-weight: 700; color: #f44336; font-size: 17px; }
+.hidden { display: none !important; }
+.date-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.date-row label { font-size: 13px; color: #888; white-space: nowrap; }
+.date-chip {
+  background: #e8f5e9;
+  color: #2E7D32;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #eee;
+  color: #666;
+  margin-right: 4px;
+}
+.empty { text-align: center; color: #aaa; padding: 24px 0; font-size: 14px; }
+h3 { font-size: 14px; color: #666; margin: 16px 0 8px; }
+.salary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+}
+.salary-row:last-child { border-bottom: none; }
+.salary-row .meta { font-size: 12px; color: #888; margin-top: 2px; }
+.salary-row .amt { font-weight: 700; color: #2196F3; }
+.category-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+.category-buttons button {
+  background: #f0f0f0;
+  color: #333;
+  padding: 12px;
+  margin: 0;
+  font-size: 14px;
+}
+.category-buttons button.active {
+  background: #4CAF50;
+  color: #fff;
+}
+</style>
+</head>
+<body>
+
+<div class="totals">
+  <div class="label">เงินเหลือในกระปุก</div>
+  <div class="big" id="jar-balance">฿0</div>
+  <div class="row">
+    <span class="label">ใช้ได้วันนี้</span>
+    <span class="sub" id="today-left">฿0</span>
+  </div>
+  <div class="row">
+    <span class="label">ใช้ไปวันนี้</span>
+    <span class="sub" id="today-spent">฿0</span>
+  </div>
+</div>
+
+<section id="tab-expense">
+  <div class="card">
+    <h2>บันทึกค่าใช้จ่าย</h2>
+    <input id="exp-name" type="text" placeholder="ชื่อรายการ" autocomplete="off">
+    <h3>หมวด</h3>
+    <div class="category-buttons" id="cat-buttons">
+      <button type="button" data-cat="อาหาร" class="active">🍚 อาหาร</button>
+      <button type="button" data-cat="เดินทาง">🚗 เดินทาง</button>
+      <button type="button" data-cat="ที่อยู่">🏠 ที่อยู่</button>
+      <button type="button" data-cat="อื่นๆ">🎉 อื่นๆ</button>
+    </div>
+    <div class="date-row">
+      <label>วันที่:</label>
+      <div class="date-chip" id="date-chip" onclick="pickDate()">
+        📅 <span id="date-label">วันนี้</span>
+      </div>
+      <input type="date" id="exp-date" class="hidden">
+    </div>
+    <input id="exp-amount" type="number" placeholder="จำนวนเงิน (บาท)" inputmode="decimal">
+    <div class="quick-amounts">
+      <button type="button" onclick="addAmount(20)">+20</button>
+      <button type="button" onclick="addAmount(50)">+50</button>
+      <button type="button" onclick="addAmount(100)">+100</button>
+      <button type="button" onclick="addAmount(500)">+500</button>
+    </div>
+    <button onclick="saveExpense()">บันทึก</button>
+  </div>
+  <div class="card">
+    <h2>รายการวันนี้</h2>
+    <div id="today-list"></div>
+  </div>
+</section>
+
+<section id="tab-salary" class="hidden">
+  <div class="card">
+    <h2>💰 ตั้งค่าเงินเดือน</h2>
+    <input id="salary-amount" type="number" placeholder="เงินเดือน (บาท)" inputmode="decimal">
+    <button onclick="saveSalary()">บันทึกเงินเดือน</button>
+  </div>
+  <div class="card">
+    <h2>💸 ตั้งค่างบต่อวัน</h2>
+    <div class="row-flex">
+      <select id="daily-mode">
+        <option value="auto">Auto (ตามเดือน)</option>
+        <option value="manual">Manual (กำหนดเอง)</option>
+      </select>
+      <input id="daily-manual" type="number" placeholder="บาท/วัน" inputmode="decimal">
+    </div>
+    <button onclick="saveDailyBudget()">บันทึก</button>
+  </div>
+  <div class="card">
+    <h2>📌 รายการหักประจำ</h2>
+    <div id="recurrence-list"></div>
+    <button class="secondary" onclick="addRecurrence()">+ เพิ่มรายการ</button>
+  </div>
+</section>
+
+<section id="tab-report" class="hidden">
+  <div class="card">
+    <h2>📊 เดือนนี้</h2>
+    <div id="month-report"></div>
+  </div>
+</section>
+
+<div class="undo-bar" id="undo-bar">
+  <span id="undo-text">บันทึกแล้ว</span>
+  <button onclick="doUndo()">↩ ย้อนกลับ</button>
+</div>
+
+<nav class="tab-bar">
+  <button class="active" data-tab="expense" onclick="switchTab('expense')">💵<br>ค่าใช้จ่าย</button>
+  <button data-tab="salary" onclick="switchTab('salary')">💰<br>เงินเดือน</button>
+  <button data-tab="report" onclick="switchTab('report')">📊<br>รายงาน</button>
+</nav>
+
+<script>
+let currentCategory = 'อาหาร';
+let lastAction = null;
+let undoTimer = null;
+let totals = { jarBalance: 0, todayLeft: 0, todaySpent: 0 };
+let todayExpenses = [];
+let recurrences = [];
+
+function fmt(n) {
+  if (!n && n !== 0) return '฿0';
+  return '฿' + Math.round(n).toLocaleString('th-TH');
+}
+
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+function dateLabel(d) {
+  if (d === todayStr()) return 'วันนี้';
+  const dd = new Date(d);
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return dd.getDate() + ' ' + months[dd.getMonth()];
+}
+
+function switchTab(tab) {
+  currentCategory = currentCategory || 'อาหาร';
+  document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.tab-bar button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  if (tab === 'salary') loadRecurrences();
+  if (tab === 'report') loadReport();
+}
+
+function pickDate() {
+  const el = document.getElementById('exp-date');
+  el.valueAsDate = new Date();
+  if (el.showPicker) el.showPicker();
+  else el.click();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('exp-date').valueAsDate = new Date();
+  document.getElementById('date-label').textContent = 'วันนี้';
+
+  document.getElementById('exp-date').addEventListener('change', (e) => {
+    const val = e.target.value;
+    document.getElementById('date-label').textContent = val ? dateLabel(val) : 'วันนี้';
+  });
+
+  document.querySelectorAll('#cat-buttons button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#cat-buttons button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = btn.dataset.cat;
+    });
+  });
+
+  refresh();
+  loadRecurrences();
+});
+
+function addAmount(n) {
+  const el = document.getElementById('exp-amount');
+  const cur = parseFloat(el.value) || 0;
+  el.value = cur + n;
+}
+
+async function saveExpense() {
+  const name = document.getElementById('exp-name').value.trim();
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  const date = document.getElementById('exp-date').value || todayStr();
+
+  if (!amount || amount <= 0) {
+    alert('ใส่จำนวนเงินก่อนนะ');
+    return;
+  }
+
+  const payload = {
+    name: name || currentCategory,
+    amount: amount,
+    date: date,
+    category: currentCategory
+  };
+
+  try {
+    const id = await Android.saveExpense(JSON.stringify(payload));
+    lastAction = { id: id, type: 'expense' };
+    document.getElementById('exp-name').value = '';
+    document.getElementById('exp-amount').value = '';
+    showUndo('บันทึก ' + fmt(amount) + ' แล้ว');
+    await refresh();
+  } catch (e) {
+    alert('บันทึกไม่ได้: ' + e);
+  }
+}
+
+function showUndo(text) {
+  const bar = document.getElementById('undo-bar');
+  document.getElementById('undo-text').textContent = text;
+  bar.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => { bar.classList.remove('show'); }, 5000);
+}
+
+async function doUndo() {
+  if (!lastAction) return;
+  clearTimeout(undoTimer);
+  document.getElementById('undo-bar').classList.remove('show');
+  try {
+    if (lastAction.type === 'expense') {
+      await Android.deleteExpense(lastAction.id);
+    }
+    lastAction = null;
+    await refresh();
+  } catch (e) {
+    alert('ย้อนกลับไม่ได้: ' + e);
+  }
+}
+
+window.onTotals = function(t) {
+  totals = t;
+  document.getElementById('jar-balance').textContent = fmt(t.jarBalance);
+  document.getElementById('today-left').textContent = fmt(t.todayLeft);
+  document.getElementById('today-spent').textContent = fmt(t.todaySpent);
+};
+
+window.onTodayExpenses = function(list) {
+  todayExpenses = list;
+  renderTodayList();
+};
+
+function renderTodayList() {
+  const el = document.getElementById('today-list');
+  if (!todayExpenses || todayExpenses.length === 0) {
+    el.innerHTML = '<div class="empty">ยังไม่มีรายการวันนี้</div>';
+    return;
+  }
+  el.innerHTML = todayExpenses.map(e => `
+    <div class="expense-item">
+      <div class="info">
+        <div class="name">${escapeHtml(e.name)}</div>
+        <div class="date">${escapeHtml(e.category)} • ${dateLabel(e.date)}</div>
+      </div>
+      <div class="amt">${fmt(e.amount)}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function refresh() {
+  try {
+    await Android.refreshTotals();
+    await Android.refreshTodayList();
+  } catch (e) { }
+}
+
+async function saveSalary() {
+  const amount = parseFloat(document.getElementById('salary-amount').value);
+  if (!amount || amount <= 0) { alert('ใส่จำนวนเงินเดือน'); return; }
+  await Android.saveSalary(amount);
+  alert('บันทึกเงินเดือนแล้ว');
+  await refresh();
+}
+
+async function saveDailyBudget() {
+  const mode = document.getElementById('daily-mode').value;
+  const manual = parseFloat(document.getElementById('daily-manual').value) || 0;
+  await Android.saveDailyBudget(mode, manual);
+  await refresh();
+  alert('บันทึกงบต่อวันแล้ว');
+}
+
+async function loadRecurrences() {
+  try {
+    const list = await Android.getRecurrences();
+    recurrences = JSON.parse(list);
+    renderRecurrences();
+  } catch (e) { }
+}
+
+window.onRecurrences = function(list) {
+  recurrences = list;
+  renderRecurrences();
+};
+
+function renderRecurrences() {
+  const el = document.getElementById('recurrence-list');
+  if (!recurrences || recurrences.length === 0) {
+    el.innerHTML = '<div class="empty">ยังไม่มีรายการหักประจำ</div>';
+    return;
+  }
+  el.innerHTML = recurrences.map(r => `
+    <div class="salary-row">
+      <div>
+        <div>${escapeHtml(r.name)} <span class="pill">${escapeHtml(r.type)}</span></div>
+        <div class="meta">${fmt(r.baseAmount)} ${r.percentPerYear > 0 ? '• +' + r.percentPerYear + '%/ปี' : ''}</div>
+      </div>
+      <div class="amt">${fmt(r.currentAmount || r.baseAmount)}</div>
+    </div>
+  `).join('');
+}
+
+async function addRecurrence() {
+  const name = prompt('ชื่อรายการ (เช่น PVD, ประกันชีวิต, เงินออม)');
+  if (!name) return;
+  const type = prompt('ประเภท (PVD / DCA / INSURANCE / SAVING / OTHER)', 'OTHER');
+  if (!type) return;
+  const amount = parseFloat(prompt('จำนวนเงิน (บาท)', '0'));
+  if (!amount) return;
+  const pct = parseFloat(prompt('% ต่อปี (ใส่ 0 ถ้าไม่ปรับ)', '0')) || 0;
+
+  await Android.saveRecurrence(JSON.stringify({
+    name: name, type: type, baseAmount: amount, percentPerYear: pct,
+    currentAmount: amount, startYear: new Date().getFullYear()
+  }));
+  await loadRecurrences();
+}
+
+async function loadReport() {
+  try {
+    const data = await Android.getMonthReport();
+    const r = JSON.parse(data);
+    document.getElementById('month-report').innerHTML = `
+      <div class="salary-row">
+        <span>ใช้ไปเดือนนี้</span>
+        <span class="amt">${fmt(r.totalSpent)}</span>
+      </div>
+      <div class="salary-row">
+        <span>จำนวนรายการ</span>
+        <span class="amt">${r.count} รายการ</span>
+      </div>
+      <div class="salary-row">
+        <span>เฉลี่ย/วัน</span>
+        <span class="amt">${fmt(r.avgPerDay)}</span>
+      </div>
+    `;
+  } catch (e) { }
+}
+</script>
+
+</body>
+</html>
