@@ -1,7 +1,6 @@
 package com.example.jars
 
 import android.content.Context
-import com.example.jars.data.AppDatabase
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -14,13 +13,14 @@ data class Totals(
 
 object MoneyEngine {
 
-    fun compute(context: Context, db: AppDatabase): Totals {
+    fun compute(context: Context): Totals {
         val prefs = context.getSharedPreferences("money_prefs", Context.MODE_PRIVATE)
         val today = LocalDate.now()
         val ym = YearMonth.from(today)
+        val todayStr = today.toString()
 
         val salary = prefs.getFloat("salary", 0f).toDouble()
-        val totalSpentAll = db.expenseDao().sumAll()
+        val totalSpentAll = prefs.getFloat("totalSpentAll", 0f).toDouble()
         val jar = salary - totalSpentAll
 
         val mode = prefs.getString("daily_mode", "auto") ?: "auto"
@@ -33,7 +33,7 @@ object MoneyEngine {
             (jar / daysLeft).coerceAtLeast(0.0)
         }
 
-        val todaySpent = db.expenseDao().sumToday() ?: 0.0
+        val todaySpent = prefs.getFloat("todaySpent_$todayStr", 0f).toDouble()
         val todayLeft = (daily - todaySpent).coerceAtLeast(0.0)
 
         return Totals(
