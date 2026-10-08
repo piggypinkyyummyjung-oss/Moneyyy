@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🍚 ใช้ได้วันนี้"
+        android:textSize="14sp"
+        android:textColor="#666666" />
+
+    <TextView
+        android:id="@+id/w_today_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="฿0"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#2E7D32" />
+
+    <TextView
+        android:id="@+id/w_today_spent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ใช้ไปแล้ว ฿0"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="แตะเพื่อบันทึก"
+        android:textSize="12sp"
+        android:textColor="#4CAF50"
+        android:layout_marginTop="8dp"
+        android:gravity="center" />
+</LinearLayout>
