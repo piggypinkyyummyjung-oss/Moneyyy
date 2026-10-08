@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -25,26 +25,41 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Setup Gradle Wrapper
+      - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.9
 
-      - name: Make gradlew executable
+      - name: Fix gradlew permissions
         run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Print Gradle version
+        run: ./gradlew --version
+
+      - name: Build with full log
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info
+        continue-on-error: false
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          if-no-files-found: warn
 
-      - name: Upload reports on failure
+      - name: Upload all logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
+          if-no-files-found: ignore
+
+      - name: Upload error build output
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
-          path: app/build/reports/
+          name: error-output
+          path: app/build/
           if-no-files-found: ignore
