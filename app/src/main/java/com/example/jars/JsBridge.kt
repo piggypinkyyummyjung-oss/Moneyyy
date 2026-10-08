@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class JsBridge(private val context: Context, private val webView: WebView) {
 
@@ -59,8 +60,9 @@ class JsBridge(private val context: Context, private val webView: WebView) {
 
     @JavascriptInterface
     fun getMonthReport(): String {
-        val totalSpent = db.expenseDao().sumMonth() ?: 0.0
-        val count = db.expenseDao().countMonth() ?: 0
+        val ym = LocalDate.now().toString().substring(0, 7)
+        val totalSpent = db.expenseDao().sumMonth(ym) ?: 0.0
+        val count = db.expenseDao().countMonth(ym) ?: 0
         val avg = if (count > 0) totalSpent / count else 0.0
         val data = mapOf(
             "totalSpent" to totalSpent,
@@ -101,7 +103,8 @@ class JsBridge(private val context: Context, private val webView: WebView) {
 
     private fun pushTodayList() {
         scope.launch {
-            val list = db.expenseDao().getToday()
+            val today = LocalDate.now().toString()
+            val list = db.expenseDao().getByDate(today)
             webView.post {
                 webView.evaluateJavascript(
                     "window.onTodayExpenses(${gson.toJson(list)})", null
